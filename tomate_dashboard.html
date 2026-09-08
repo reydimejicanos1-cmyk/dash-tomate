@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cultivo de Tomate — San Marcos | Convoy of Hope</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #F4F0E4;
+  min-height: 100vh;
+  color: #2E3420;
+  padding: 0 0 60px 0;
+}
+
+input::placeholder { color: #A69A78; }
+
+.card-hover { transition: all 0.15s ease; cursor: pointer; }
+.card-hover:hover { background: #F0EAD8 !important; border-color: #A8B87A !important; }
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+.serif { font-family: 'Fraunces', serif; }
+
+.header {
+  background: linear-gradient(135deg, #3A4526 0%, #2E3420 100%);
+  padding: 32px 40px 28px;
+  border-bottom: 3px solid #8C5A22;
+  position: relative;
+  overflow: hidden;
+}
+.header::after {
+  content: '';
+  position: absolute; right: -40px; top: -60px; width: 260px; height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(214,138,63,0.15) 0%, transparent 70%);
+}
+.header .eyebrow {
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: #C9A876; margin-bottom: 6px;
+}
+.header h1 {
+  font-size: 34px; font-weight: 700; color: #F4F0E4; letter-spacing: -0.01em;
+}
+.header .sub { font-size: 14px; color: #B8C299; margin-top: 6px; }
+
+.container { padding: 28px 40px; max-width: 1280px; margin: 0 auto; }
+
+.selector-bar {
+  display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 24px; background: #FBF8F1; border: 1px solid #DCD3BE;
+  border-radius: 6px; padding: 14px 18px;
+}
+.selector-bar .label {
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #8A7F63;
+}
+.selector-bar input[type="text"] {
+  flex: 1; min-width: 220px; padding: 8px 12px; border-radius: 4px;
+  border: 1px solid #DCD3BE; font-family: 'Inter', sans-serif;
+  font-size: 14px; background: #FFFDF8; color: #2E3420; outline: none;
+}
+.mun-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+.mun-btn {
+  padding: 7px 14px; border-radius: 20px; border: 1px solid #DCD3BE;
+  background: #FFFDF8; color: #4A4530;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  cursor: pointer; transition: all 0.15s ease;
+}
+.mun-btn.active { background: #6B7F3E; border-color: #6B7F3E; color: #F4F0E4; }
+
+#resultList {
+  background: #FBF8F1; border: 1px solid #DCD3BE; border-radius: 6px;
+  margin-bottom: 24px; max-height: 280px; overflow-y: auto; display: none;
+}
+.result-row {
+  padding: 10px 16px; border-bottom: 1px solid #E8E2D0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.result-row .name { font-family: 'Fraunces', serif; font-size: 15px; color: #2E3420; }
+.result-row .meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8A7F63; }
+.result-row .rid { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #A69A78; }
+.empty-msg { padding: 16px; color: #8A7F63; font-size: 14px; }
+
+#profileView {
+  background: #FFFDF8; border: 1px solid #DCD3BE; border-radius: 8px;
+  padding: 26px 28px; margin-bottom: 28px; position: relative; display: none;
+}
+.back-btn {
+  position: absolute; top: 20px; right: 20px; background: transparent;
+  border: 1px solid #DCD3BE; border-radius: 4px; padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8A7F63; cursor: pointer;
+}
+.profile-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: #8C5A22; margin-bottom: 4px;
+}
+.profile-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #2E3420; margin: 0 0 20px 0; }
+
+.profile-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px; margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid #E8E2D0;
+}
+.pfield-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: #A69A78; margin-bottom: 3px;
+}
+.pfield-value { font-family: 'Fraunces', serif; font-size: 16px; color: #2E3420; }
+
+.profile-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.section-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: #8A7F63; margin-bottom: 10px; margin-top: 18px;
+}
+.section-label:first-child { margin-top: 0; }
+
+.tag {
+  display: inline-block; padding: 3px 9px; border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  margin-right: 6px; margin-bottom: 6px; border: 1px solid;
+}
+.tag.good { background: #E7EFD9; color: #4C5E2B; border-color: #C4D4A4; }
+.tag.warn { background: #F5E8D8; color: #8C5A22; border-color: #E3C79B; }
+.tag.bad  { background: #F3DEDA; color: #8C3A2A; border-color: #E3AFA2; }
+.tag.neutral { background: #EDE7D6; color: #5C5638; border-color: #D7CDAF; }
+
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px; margin-bottom: 24px;
+}
+.kpi-card {
+  background: #FBF8F1; border: 1px solid #DCD3BE; border-radius: 4px;
+  padding: 18px 20px; position: relative; overflow: hidden;
+}
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+  background: var(--accent, #6B7F3E);
+}
+.kpi-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #8A7F63; margin-bottom: 8px; padding-left: 8px;
+}
+.kpi-value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; color: #2E3420; line-height: 1; padding-left: 8px; }
+.kpi-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8A7F63; margin-top: 6px; padding-left: 8px; }
+
+.panels { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; margin-bottom: 20px; }
+.panel { background: #FBF8F1; border: 1px solid #DCD3BE; border-radius: 6px; padding: 20px 22px; }
+.panel-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: #2E3420; margin-bottom: 16px; }
+
+.bar-row { margin-bottom: 10px; }
+.bar-label-row { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #4A4530; margin-bottom: 3px; }
+.bar-label-row .count { color: #8A7F63; }
+.bar-track { background: #E8E2D0; border-radius: 2px; height: 8px; overflow: hidden; }
+.bar-fill { height: 100%; transition: width 0.5s ease; }
+
+.subsection-divider { margin-top: 18px; padding-top: 14px; border-top: 1px solid #E8E2D0; }
+
+.footnote { margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #A69A78; text-align: center; }
+
+.narrative-trigger-row { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+.narrative-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 4px; border: 1px solid #6B7F3E;
+  background: #6B7F3E; color: #F4F0E4;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.02em;
+  cursor: pointer; transition: all 0.15s ease;
+}
+.narrative-btn:hover { background: #5A6B33; border-color: #5A6B33; }
+.narrative-btn.secondary {
+  background: transparent; color: #6B7F3E;
+}
+.narrative-btn.secondary:hover { background: #E7EFD9; }
+
+#narrativePanel {
+  display: none; background: #FFFDF8; border: 1px solid #DCD3BE; border-left: 4px solid #8C5A22;
+  border-radius: 6px; padding: 26px 28px; margin-bottom: 24px;
+}
+.narrative-header {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;
+  padding-bottom: 14px; border-bottom: 1px solid #E8E2D0;
+}
+.narrative-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: #8C5A22; margin-bottom: 4px;
+}
+.narrative-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: #2E3420; }
+.narrative-close {
+  background: transparent; border: 1px solid #DCD3BE; border-radius: 4px; padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8A7F63; cursor: pointer;
+}
+.narrative-body { font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; color: #3A3826; }
+.narrative-body h3 {
+  font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; color: #2E3420;
+  margin: 20px 0 8px 0;
+}
+.narrative-body h3:first-child { margin-top: 0; }
+.narrative-body p { margin-bottom: 10px; }
+.narrative-body strong { color: #2E3420; font-weight: 600; }
+.narrative-body ul { margin: 6px 0 12px 20px; }
+.narrative-body li { margin-bottom: 4px; }
+.narrative-footer {
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid #E8E2D0;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+}
+.narrative-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #A69A78; }
+
+@media (max-width: 800px) {
+  .container { padding: 20px; }
+  .header { padding: 24px 20px; }
+  .profile-cols { grid-template-columns: 1fr; }
+  .panels { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Ficha de Campo · Estudio Agronómico</div>
+  <h1 class="serif">Cultivo de Tomate — San Marcos</h1>
+  <div class="sub">200 productores registrados · Municipios de San Marcos, Palo Gordo y Tejutla</div>
+</div>
+
+<div class="container">
+
+  <div class="selector-bar">
+    <div class="label">Buscar productor</div>
+    <input type="text" id="searchInput" placeholder="Nombre del productor...">
+    <div class="mun-buttons" id="munButtons"></div>
+  </div>
+
+  <div id="resultList"></div>
+
+  <div id="narrativePanel"></div>
+
+  <div id="profileView"></div>
+
+  <div id="summaryView"></div>
+
+</div>
+
+<script>
+const PRODUCTORES = [{"id": "201184829", "nombre": "Cirilo Juan López Pojoy", "edad": 44, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 1543.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135420", "nombre": "Jorge Bardeondo Castro", "edad": 54, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 4410.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Tyral", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207891402", "nombre": "Deogenes Alejandro Lopez de Leon", "edad": 61, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 7497.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208601696", "nombre": "Anibal Obed Barrios Garcia", "edad": 31, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 2205.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "208605954", "nombre": "Abelino  Barrios Guzman", "edad": 59, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 22050.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208633016", "nombre": "Aurelia Ester Ramirez Villacinda", "edad": 48, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208633018", "nombre": "Sandra Amarilis Barrios Rodas", "edad": 45, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "208633019", "nombre": "Gloria Hipolita de León Rodas", "edad": 45, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 6615.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209531076", "nombre": "Alberto Patrocinio Barrios Guzman", "edad": 65, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 4410.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209552799", "nombre": "Hector Ramón Barrios de Leon", "edad": 60, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 6615.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "209553159", "nombre": "Pablo Raquel Barrios de Leon", "edad": 66, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 5733.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576185", "nombre": "Edilia Magali de Leon Barrios de de León", "edad": 40, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 882.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576188", "nombre": "Demetria Saturnina Barrios Guzman", "edad": 67, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 4410.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576190", "nombre": "Edilma Sarai Barrios Barrios", "edad": 42, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576626", "nombre": "Elvis Anibal Ochoa Morales", "edad": 45, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 665.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576629", "nombre": "Edubilia Nineth Chen Barrios", "edad": 24, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209577899", "nombre": "Joel Enrrique de Leon Fuentes", "edad": 61, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 1764.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": true}, {"id": "209578195", "nombre": "Lidia Verónica de Leon Dionicio", "edad": 38, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 2205.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209578198", "nombre": "Madelyn Yoseni Barrios de Leon", "edad": 29, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Don Raul", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209578735", "nombre": "Aura Marina Fuentes Barrios", "edad": 51, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 6615.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209578741", "nombre": "Marvin Abel de Leon Orozco", "edad": 40, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 0.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": true}, {"id": "209579474", "nombre": "Nancy Yanet Diaz Gonzalez", "edad": 35, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 4410.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209579859", "nombre": "Rosa Migdalia Orozco", "edad": 42, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209579870", "nombre": "Saira Yakyra Solis Barrios", "edad": 25, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210960420", "nombre": "Amilcar Leonel Barrios Guzmán", "edad": 55, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 4410.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210960421", "nombre": "Alberto Eugenio Orozco López", "edad": 63, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 882.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210960422", "nombre": "Ronel Barrios", "edad": 32, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 4410.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": true}, {"id": "210971862", "nombre": "Leonsio de Jesús Barrios de León", "edad": 72, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 3528.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210971864", "nombre": "Jorge Rolando de Leon", "edad": 48, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210973106", "nombre": "Verónica Beatriz Juarez Arreaga", "edad": 26, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 2440.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210973315", "nombre": "Virginia Maria Bamaca Ramos", "edad": 63, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211349620", "nombre": "Ardani Abolió Bonilla", "edad": 31, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 222.5, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Don Raul", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211459376", "nombre": "Teresa Virginia Barrios Lopez", "edad": 70, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 1764.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Tointer", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211467323", "nombre": "Edgar Ronel Barrios Lopez", "edad": 65, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 8820.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "211469624", "nombre": "Felipe Exequel Lopez Barrios", "edad": 62, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 2205.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "211469761", "nombre": "Dora Alicia Barrios de Leon", "edad": 55, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 4410.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211469772", "nombre": "Luisa Emelina de León Rodas", "edad": 28, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 1323.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211469773", "nombre": "Ada Eunice Bonilla Guzmán", "edad": 44, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 4410.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211471817", "nombre": "Filadelfo Faustino Fuentes Barrios", "edad": 49, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 4410.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211481742", "nombre": "Tito Wilfredo de Leon", "edad": 45, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 11025.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Tabare", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": true}, {"id": "211612569", "nombre": "Moisés Rosalio Barrios Guzman", "edad": 66, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 882.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": true}, {"id": "211622512", "nombre": "Miriam Liseth Guzman de Leon", "edad": 49, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 1323.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211622706", "nombre": "Rosendo Bonilla", "edad": 63, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211779596", "nombre": "Jose Laureano Barrios Guzman", "edad": 68, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 22050.0, "invernadero": true, "macroTunel": true, "casaMalla": true, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211780657", "nombre": "Pedro Tranqulino Fuentes", "edad": 49, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 8820.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211781108", "nombre": "Richard Bernabe Barrios de Leon", "edad": 34, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 0.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211782017", "nombre": "Angel Osiel Maldonado Barrios", "edad": 45, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 2646.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Tyral", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "211782146", "nombre": "Oliverio Idavid Mazariegos Barrios", "edad": 75, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 1804.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211782440", "nombre": "Malvin Obed de Leon Orozco", "edad": 40, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 0.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211783062", "nombre": "María Antonia de León de León", "edad": 50, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 8842.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211918545", "nombre": "Iris Yulisa Lopez Maldonado", "edad": 22, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "201277084", "nombre": "Juan Gerardo de Jesús Lopez Lopez", "edad": 73, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209582774", "nombre": "Manfredo Adalberto Lopez Lopez", "edad": 75, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 1250.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210478727", "nombre": "Ana Sofia Lopez Lopez", "edad": 66, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 1764.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210478961", "nombre": "Ruben Gonzalo Barrios Lopez", "edad": 58, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 881.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210479889", "nombre": "Odilia Isidra Bonilla de Leon", "edad": 64, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 881.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210642950", "nombre": "Angel Alfonso Perez Hernandez", "edad": 49, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210974777", "nombre": "María del Carmen Lopez Lopez", "edad": 44, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210974777", "nombre": "Elizabeth Josefina Merida Guzman", "edad": 63, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211625242", "nombre": "Justo Arnoldo Morales Mendez", "edad": 65, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211625563", "nombre": "Iliam Ahidee Merida Ochoa", "edad": 44, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1200.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211915759", "nombre": "Elmer Rogelio Lopez Bonilla", "edad": 43, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211916167", "nombre": "Rocael pantaleon Lopez Barrios", "edad": 50, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1200.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203282870", "nombre": "Abner Alvarado", "edad": 30, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 874.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "201462873", "nombre": "Arody Asael Arribillaga Barrios", "edad": 37, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 160.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646824", "nombre": "Artemio Perez", "edad": 69, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 173.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646853", "nombre": "Aura Leticia Gusman Maroquin", "edad": 39, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 240.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203282851", "nombre": "Deysy Maribaldi Chun Chun", "edad": 27, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 240.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646837", "nombre": "Edwin Francisvo De Leon Escobar", "edad": 63, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 150.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570414", "nombre": "Edwin Jocol", "edad": 40, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 220.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203282836", "nombre": "Ernesto Lucas Arribillaga Lopez", "edad": 62, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "201462908", "nombre": "Eugemio Emeterio Barrios Gonzales", "edad": 75, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 605.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646821", "nombre": "Fernando Perez", "edad": 54, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646841", "nombre": "Gloria Esperansa Maldonado Santai", "edad": 54, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 150.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570412", "nombre": "Gloria Velasquez", "edad": 42, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 220.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646835", "nombre": "Ismael Neptali Aguilar Bamaca", "edad": 59, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "200661559", "nombre": "Jesus Rolando Muñoz", "edad": 57, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 640.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "209570408", "nombre": "Jorge Luis Castañon", "edad": 71, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 75.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "203282867", "nombre": "Julian Arivillaga", "edad": 51, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 890.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "200661557", "nombre": "Maynor Ernesto Aribillaga Ramirez", "edad": 29, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 400.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "203282850", "nombre": "Melany Anaite Chun Gomez", "edad": 24, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 350.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "201462851", "nombre": "Noe Barrios", "edad": 56, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 320.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570418", "nombre": "Rigoberto Diaz", "edad": 25, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 80.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "200661553", "nombre": "Rosvin Esequiel Diaz Barrios", "edad": 31, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 620.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "203524483", "nombre": "Roxana Perez", "edad": 32, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 173.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646829", "nombre": "Sara Aguilar", "edad": 54, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570416", "nombre": "Vielman Diaz", "edad": 42, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 63.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570409", "nombre": "Vivian Judith Castañon", "edad": 32, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 45.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646839", "nombre": "Yeni Asucena De Leon Santai", "edad": 32, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 150.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207898293", "nombre": "Deciderio Efrain Lopez", "edad": 64, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570407", "nombre": "Bernabe Domingo Macario Gomez", "edad": 45, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 45.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207902263", "nombre": "Romulo Cándido Arreaga Sandoval", "edad": 81, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 1600.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "201462898", "nombre": "Erick Fernando Barrrios de Leon", "edad": 46, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 408.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Silverado", "varIndeterminada": "", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209579476", "nombre": "Osbeli Salvador de leon Barrios", "edad": 45, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 3608.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209580371", "nombre": "Sucely Ninet Barrios Ramirez", "edad": 31, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": true}, {"id": "211469286", "nombre": "Daudin Aranis de Leon Barrios", "edad": 30, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 1804.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "199881166", "nombre": "Rene Alberto Merida Reyna", "edad": 58, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203282859", "nombre": "Alicia Violeta Perez", "edad": 47, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 80.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Silverado", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203725326", "nombre": "Abelito Belarmino Fuentes de Leon", "edad": 25, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Silverado", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135362", "nombre": "Oscar Alissandro de León Ruiz", "edad": 69, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 13330.0, "invernadero": true, "macroTunel": true, "casaMalla": true, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135378", "nombre": "Dorotea Eloina López Fuentes", "edad": 58, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 2205.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135386", "nombre": "Olga Carmelina Orozco Castañon", "edad": 59, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 3512.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576187", "nombre": "Aracely Carolina Lopez Nolasco", "edad": 48, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 210.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209577900", "nombre": "Hermitania Magaly Rodriguez Lopez", "edad": 48, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209578731", "nombre": "Magdalena Aracely de Leon Miranda", "edad": 46, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 100.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209579877", "nombre": "Ruben Dario Velasquez Roblero", "edad": 35, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 390.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210973321", "nombre": "Esperanza Evangélica de Leon Morales", "edad": 38, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210973338", "nombre": "Irlanda Rosmery Barrios", "edad": 36, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211471351", "nombre": "Vilma Olimpia Solis Lopez", "edad": 38, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 2220.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211584937", "nombre": "ETI ISABEL DE LEÓN DE LEÓN", "edad": 56, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 2337.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211589468", "nombre": "CATALINA SECUNDINA MERIDA DIAZ", "edad": 37, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 13640.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211737532", "nombre": "IDALIA VERONICA MALDONADO DE LEÓN", "edad": 30, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211918746", "nombre": "Bernabela Maria Angel Rodriguez", "edad": 59, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 4410.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "199880508", "nombre": "Udy Osmundo Isidro Lopez", "edad": 42, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203844479", "nombre": "Elvin Regino Lopez Lopez", "edad": 48, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1300.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210642010", "nombre": "Fidencio Eli Bonilla", "edad": 46, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 881.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210644232", "nombre": "Reina Esperanza Hernandez Lopez", "edad": 70, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 881.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210973748", "nombre": "Juan Thomas Barrios Escobar", "edad": 64, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1200.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211626075", "nombre": "Marta Lorenza Solis", "edad": 45, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 600.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211916645", "nombre": "Auscencio Domingo de Leon Sandoval", "edad": 67, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1500.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646848", "nombre": "Audberto Guadalupe Chun Perez", "edad": 67, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 140.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646826", "nombre": "Casimiro Vicente Escalante Perez", "edad": 54, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570410", "nombre": "Elias Macario Velasquez", "edad": 27, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 230.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203725317", "nombre": "Mercedes Dominga Dionicio Navarro", "edad": 50, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": true, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135371", "nombre": "Helber Gudiel Aguilar de León", "edad": 28, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 8379.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "P52", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135405", "nombre": "Heylin Dayana Arandi Flores", "edad": 28, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135414", "nombre": "Mirka de León Flores", "edad": 22, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209580370", "nombre": "Francisca Enrrique Navarro Dionicio", "edad": 63, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 8820.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211625722", "nombre": "Yorvin Irael Aguilar Velarde", "edad": 27, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "199882481", "nombre": "Audencio Adolfo Arreaga Roblero", "edad": 43, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 2000.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "199885411", "nombre": "Claudia Alejandra Lopez", "edad": 52, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "199887495", "nombre": "Nely Inocencia Diaz Gonzales", "edad": 42, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 2.2, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203844702", "nombre": "María Magdalena Pascual Miranda", "edad": 26, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203844977", "nombre": "Lincy  Adamelky Lopez Lopez", "edad": 33, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203845420", "nombre": "Elida Aracely Lopez Bravo", "edad": 56, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 441.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207901130", "nombre": "Eluvia Maria Aguilon Bravo", "edad": 37, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 220.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207905599", "nombre": "Diomiro Cándido Escobar Lopez", "edad": 55, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 800.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210159109", "nombre": "Leonardo Felipe Giron", "edad": 67, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 2000.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210161042", "nombre": "Dionila Kenia Perez Lopez", "edad": 24, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1200.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210645236", "nombre": "Irma Yolanda Merida Lopez", "edad": 46, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570420", "nombre": "Anabelsy  Lopez", "edad": 45, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 50.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646843", "nombre": "Angel Geronimo Ramirez Velasquez", "edad": 64, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 360.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203282855", "nombre": "Audencio Gonzalez", "edad": 46, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 140.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646833", "nombre": "Daniel Ranferi Escalante Aguilar", "edad": 25, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646854", "nombre": "Estefani Marili Perez Guzman", "edad": 20, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 144.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208646845", "nombre": "Fernando Vinicio Ramirez Ramirez", "edad": 21, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 300.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203282845", "nombre": "Jénner Jesus Perez Godinez", "edad": 23, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 144.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "203524462", "nombre": "Josue Barrios", "edad": 33, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 240.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "203282841", "nombre": "Marco Antonio De Leon Barrios", "edad": 54, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 2576.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "200661550", "nombre": "Medardo Abrahan Diaz De  Leon", "edad": 64, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 888.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": false, "destinoMercado": false, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "208646850", "nombre": "Mefi Perez Velasquez", "edad": 32, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 160.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "201462836", "nombre": "Milton Candelario Muñoz De Leon", "edad": 30, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Silverado", "varIndeterminada": "", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "203282861", "nombre": "Oralia Muñoz", "edad": 50, "genero": "Mujeres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 320.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "201462807", "nombre": "Teodomiro Irene Barrios De Leon", "edad": 52, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 433.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "209570405", "nombre": "Timoteo Ramos", "edad": 52, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "6 a 10", "areaParcela": 200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209570406", "nombre": "Victoriano Giron Rivas", "edad": 72, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "Mas de 11", "areaParcela": 2520.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": true, "tieneBacterias": true, "tieneVirus": false}, {"id": "201184821", "nombre": "Ruben de Jesús Morales de León", "edad": 43, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 3528.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "P52", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "201184835", "nombre": "Irain Elias Morales de León", "edad": 32, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 2205.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "P52", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": false, "aranaRoja": true, "tieneBacterias": true, "tieneVirus": true}, {"id": "203725306", "nombre": "Everilda Candelaria de León de Leon", "edad": 52, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 4560.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "207135396", "nombre": "Carmen Edmundo de León", "edad": 52, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 3087.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208633015", "nombre": "Orlando Hernan Barrios Barrios", "edad": 33, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "208633020", "nombre": "Walter Jesús Barrios Fuentes", "edad": 49, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 2200.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576636", "nombre": "Ever Misael Guzman Orozco", "edad": 44, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": false, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": false, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209579472", "nombre": "Petrona Alonzo Menendez", "edad": 58, "genero": "Mujeres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 2646.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209579901", "nombre": "Saul Orozco", "edad": 43, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 4410.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Aguamiel", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210972116", "nombre": "Otto Nery Barrios", "edad": 56, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "Mas de 11", "areaParcela": 882.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210973186", "nombre": "Angel David de Leon", "edad": 56, "genero": "Hombres", "municipio": "San Marcos", "experiencia": "6 a 10", "areaParcela": 8820.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "200969695", "nombre": "Santiago Deciderio Lopez", "edad": 71, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 2000.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "207901719", "nombre": "Gladis Julieta Angel Barrios", "edad": 37, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "207902734", "nombre": "Lucinda Dalila Lopez Lopez", "edad": 46, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 882.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "203524495", "nombre": "Eliel Perez", "edad": 30, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 346.0, "invernadero": false, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203524507", "nombre": "Manuel Eugenio Lopez Pablo", "edad": 25, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 519.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "203524473", "nombre": "Mefi Perez", "edad": 33, "genero": "Hombres", "municipio": "Tejutla", "experiencia": "0 a 5", "areaParcela": 634.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": false, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "199882334", "nombre": "Odilia Lopez Ventura", "edad": 45, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "199883987", "nombre": "Francisca Magdalena Ventura Verduo", "edad": 70, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "199884679", "nombre": "Yojana Marleni Lopez Bravo", "edad": 49, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 225.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "200967149", "nombre": "Nevin Eliezer Lopez Lopez", "edad": 29, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "201273752", "nombre": "Floridalma Reyna Sandoval Lopez", "edad": 72, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 2200.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "201274761", "nombre": "Oscar Damian Lopez Escobar", "edad": 63, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 2000.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "201278042", "nombre": "Audulio  Rodrigo Merida de Leon", "edad": 66, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 3000.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "Retana", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "209576277", "nombre": "Antonio Evelio Merida Guzman", "edad": 64, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 1200.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "209581658", "nombre": "Amada Lucila Arreaga Sandoval", "edad": 66, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 1200.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210159800", "nombre": "Marta Audilia Sandoval Lopez", "edad": 64, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 1250.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210160131", "nombre": "Luisa Francisca Lopez Barrios", "edad": 57, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 2000.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "Tomoko", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210160548", "nombre": "Lino Enrique Lopez Escalante", "edad": 23, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 881.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": false, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210162011", "nombre": "Lorena Marisol Gudiel Avila", "edad": 53, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 2100.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210478052", "nombre": "Elvina Manuela de León Lopez", "edad": 74, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 881.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210479403", "nombre": "Justa Plácida de León Mendez", "edad": 36, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 881.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210641083", "nombre": "Pío Gualberto Arreaga Giron", "edad": 61, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 2500.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210641571", "nombre": "William Rolando Barrios de Leon", "edad": 63, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1800.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Toliman", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210642339", "nombre": "Dorca Idalma Lopez Lopez", "edad": 32, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 1000.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210642677", "nombre": "Victorina Gregoria Bonilla  Bonilla", "edad": 76, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 881.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210644962", "nombre": "Pilar Rosario Lopez Barrios", "edad": 64, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "210973277", "nombre": "Mauro  Aniceto Lopez Lopez", "edad": 41, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 441.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": false, "moscaBlanca": false, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210973475", "nombre": "Romeo Neftaly Merida Barrios", "edad": 53, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 3500.0, "invernadero": true, "macroTunel": true, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "Retana", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210974977", "nombre": "Alfonso Baudilio Barrios", "edad": 72, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 881.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Sir-Elyan", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "210976345", "nombre": "Efrin Rogelio Perez Molina", "edad": 30, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "6 a 10", "areaParcela": 1200.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": true, "varDeterminada": "", "varIndeterminada": "Montelimar", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211624933", "nombre": "Natalio Onofre Lopez Morales", "edad": 61, "genero": "Hombres", "municipio": "Palo Gordo", "experiencia": "0 a 5", "areaParcela": 882.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Tolstoi", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}, {"id": "211625885", "nombre": "Sayra Dianira Lopez Lopez", "edad": 36, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 1300.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": true, "tieneVirus": false}, {"id": "211917568", "nombre": "Alida Jesucita Sandoval Lopez", "edad": 50, "genero": "Mujeres", "municipio": "Palo Gordo", "experiencia": "Mas de 11", "areaParcela": 800.0, "invernadero": true, "macroTunel": false, "casaMalla": false, "riego": true, "asistenciaTecnica": false, "varDeterminada": "", "varIndeterminada": "Lancelot", "destinoFamiliar": true, "destinoMercado": true, "tieneInsectos": true, "moscaBlanca": true, "aranaRoja": false, "tieneBacterias": false, "tieneVirus": false}];
+const MUNICIPIOS = ['Todos', 'San Marcos', 'Palo Gordo', 'Tejutla'];
+
+let state = { municipio: 'Todos', query: '', selectedId: null };
+
+function pct(n, total) { return total ? Math.round((n / total) * 100) + '%' : '0%'; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function munCounts() {
+  const counts = {};
+  PRODUCTORES.forEach(p => { counts[p.municipio] = (counts[p.municipio] || 0) + 1; });
+  return counts;
+}
+
+function renderMunButtons() {
+  const counts = munCounts();
+  const el = document.getElementById('munButtons');
+  el.innerHTML = MUNICIPIOS.map(m => {
+    const n = m === 'Todos' ? PRODUCTORES.length : counts[m];
+    const active = state.municipio === m ? 'active' : '';
+    return `<button class="mun-btn ${active}" data-mun="${esc(m)}">${esc(m)} (${n})</button>`;
+  }).join('');
+  el.querySelectorAll('.mun-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.municipio = btn.getAttribute('data-mun');
+      state.selectedId = null;
+      render();
+    });
+  });
+}
+
+function getScope() {
+  return state.municipio === 'Todos' ? PRODUCTORES : PRODUCTORES.filter(p => p.municipio === state.municipio);
+}
+
+function getFiltered() {
+  return PRODUCTORES.filter(p => {
+    const matchMun = state.municipio === 'Todos' || p.municipio === state.municipio;
+    const matchQ = !state.query || p.nombre.toLowerCase().includes(state.query.toLowerCase());
+    return matchMun && matchQ;
+  });
+}
+
+function renderResultList() {
+  const el = document.getElementById('resultList');
+  if (state.selectedId || !state.query) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  const filtered = getFiltered();
+  el.style.display = 'block';
+  if (filtered.length === 0) {
+    el.innerHTML = `<div class="empty-msg">Sin coincidencias para "${esc(state.query)}"</div>`;
+    return;
+  }
+  el.innerHTML = filtered.slice(0, 20).map(p => `
+    <div class="result-row card-hover" data-id="${esc(p.id)}">
+      <div>
+        <div class="name">${esc(p.nombre)}</div>
+        <div class="meta">${esc(p.municipio)} · ${p.edad} años · ${esc(p.genero)}</div>
+      </div>
+      <div class="rid">ID ${esc(p.id)}</div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.result-row').forEach(row => {
+    row.addEventListener('click', () => {
+      state.selectedId = row.getAttribute('data-id');
+      render();
+    });
+  });
+}
+
+function tag(cls, label) { return `<span class="tag ${cls}">${label}</span>`; }
+
+function renderProfile() {
+  const el = document.getElementById('profileView');
+  if (!state.selectedId) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  const p = PRODUCTORES.find(x => x.id === state.selectedId);
+  if (!p) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <button class="back-btn" id="backBtn">← Volver al resumen</button>
+    <div class="narrative-trigger-row" style="margin-bottom:14px">
+      <button class="narrative-btn" id="narrativeBtn">Generar narrativa de este productor</button>
+    </div>
+    <div class="profile-eyebrow">Ficha del productor · ID ${esc(p.id)}</div>
+    <h2 class="profile-title">${esc(p.nombre)}</h2>
+    <div class="profile-grid">
+      <div><div class="pfield-label">Municipio</div><div class="pfield-value">${esc(p.municipio)}</div></div>
+      <div><div class="pfield-label">Edad</div><div class="pfield-value">${p.edad} años</div></div>
+      <div><div class="pfield-label">Género</div><div class="pfield-value">${esc(p.genero)}</div></div>
+      <div><div class="pfield-label">Experiencia</div><div class="pfield-value">${esc(p.experiencia)} años</div></div>
+      <div><div class="pfield-label">Área de parcela</div><div class="pfield-value">${p.areaParcela.toLocaleString()} m²</div></div>
+    </div>
+    <div class="profile-cols">
+      <div>
+        <div class="section-label">Estructura de producción</div>
+        <div>
+          ${tag(p.invernadero ? 'good' : 'neutral', (p.invernadero ? '✓' : '✗') + ' Invernadero')}
+          ${tag(p.macroTunel ? 'good' : 'neutral', (p.macroTunel ? '✓' : '✗') + ' Macro túnel')}
+          ${tag(p.casaMalla ? 'good' : 'neutral', (p.casaMalla ? '✓' : '✗') + ' Casa malla')}
+          ${tag(p.riego ? 'good' : 'bad', (p.riego ? '✓' : '✗') + ' Riego')}
+        </div>
+        <div class="section-label">Variedades de tomate</div>
+        <div>
+          ${p.varDeterminada ? tag('neutral', 'Determinada: ' + esc(p.varDeterminada)) : ''}
+          ${p.varIndeterminada ? tag('neutral', 'Indeterminada: ' + esc(p.varIndeterminada)) : ''}
+          ${(!p.varDeterminada && !p.varIndeterminada) ? tag('neutral', 'Sin registro') : ''}
+        </div>
+        <div class="section-label">Destino de la producción</div>
+        <div>
+          ${tag(p.destinoFamiliar ? 'good' : 'neutral', (p.destinoFamiliar ? '✓' : '✗') + ' Consumo familiar')}
+          ${tag(p.destinoMercado ? 'good' : 'neutral', (p.destinoMercado ? '✓' : '✗') + ' Mercado local')}
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Sanidad del cultivo</div>
+        <div>
+          ${tag(p.tieneInsectos ? 'warn' : 'good', (p.tieneInsectos ? '⚠' : '✓') + ' Insectos ' + (p.tieneInsectos ? 'presentes' : 'sin reporte'))}
+          ${p.moscaBlanca ? tag('warn', 'Mosca blanca') : ''}
+          ${p.aranaRoja ? tag('warn', 'Araña roja') : ''}
+          ${tag(p.tieneBacterias ? 'bad' : 'good', (p.tieneBacterias ? '⚠' : '✓') + ' Bacterias ' + (p.tieneBacterias ? 'presentes' : 'sin reporte'))}
+          ${tag(p.tieneVirus ? 'bad' : 'good', (p.tieneVirus ? '⚠' : '✓') + ' Virus ' + (p.tieneVirus ? 'presente' : 'sin reporte'))}
+        </div>
+        <div class="section-label">Acompañamiento</div>
+        <div>
+          ${tag(p.asistenciaTecnica ? 'good' : 'neutral', (p.asistenciaTecnica ? '✓' : '✗') + ' Asistencia técnica recibida')}
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('backBtn').addEventListener('click', () => {
+    state.selectedId = null;
+    state.query = '';
+    document.getElementById('searchInput').value = '';
+    render();
+  });
+  document.getElementById('narrativeBtn').addEventListener('click', generateNarrative);
+}
+
+function barRow(label, value, total, color) {
+  const w = total ? (value / total) * 100 : 0;
+  return `
+    <div class="bar-row">
+      <div class="bar-label-row"><span>${esc(label)}</span><span class="count">${value} · ${pct(value, total)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${color}"></div></div>
+    </div>
+  `;
+}
+
+function renderSummary() {
+  const el = document.getElementById('summaryView');
+  if (state.selectedId) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+
+  const scope = getScope();
+  const total = scope.length;
+  const nInvernadero = scope.filter(p => p.invernadero).length;
+  const nMacroTunel = scope.filter(p => p.macroTunel).length;
+  const nCasaMalla = scope.filter(p => p.casaMalla).length;
+  const nAsistencia = scope.filter(p => p.asistenciaTecnica).length;
+  const nRiego = scope.filter(p => p.riego).length;
+  const nMujeres = scope.filter(p => p.genero === 'Mujeres').length;
+  const nHombres = scope.filter(p => p.genero === 'Hombres').length;
+  const nPlagas = scope.filter(p => p.tieneInsectos).length;
+  const nMoscaBlanca = scope.filter(p => p.moscaBlanca).length;
+  const nBacterias = scope.filter(p => p.tieneBacterias).length;
+  const avgArea = total ? Math.round(scope.reduce((s, p) => s + p.areaParcela, 0) / total) : 0;
+  const avgEdad = total ? Math.round(scope.reduce((s, p) => s + p.edad, 0) / total) : 0;
+
+  const varCount = {};
+  scope.forEach(p => {
+    [p.varDeterminada, p.varIndeterminada].forEach(v => { if (v) varCount[v] = (varCount[v] || 0) + 1; });
+  });
+  const topVariedades = Object.entries(varCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+  el.innerHTML = `
+    <div class="narrative-trigger-row">
+      <button class="narrative-btn" id="narrativeBtn">Generar narrativa de análisis</button>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--accent:#6B7F3E">
+        <div class="kpi-label">Productores</div>
+        <div class="kpi-value">${total}</div>
+        <div class="kpi-sub">${state.municipio === 'Todos' ? 'los 3 municipios' : esc(state.municipio)}</div>
+      </div>
+      <div class="kpi-card" style="--accent:#8C5A22">
+        <div class="kpi-label">Edad promedio</div>
+        <div class="kpi-value">${avgEdad}</div>
+        <div class="kpi-sub">años</div>
+      </div>
+      <div class="kpi-card" style="--accent:#6B7F3E">
+        <div class="kpi-label">Área promedio</div>
+        <div class="kpi-value">${avgArea.toLocaleString()}</div>
+        <div class="kpi-sub">m² por parcela</div>
+      </div>
+      <div class="kpi-card" style="--accent:#4C7B9E">
+        <div class="kpi-label">Con riego</div>
+        <div class="kpi-value">${pct(nRiego, total)}</div>
+        <div class="kpi-sub">${nRiego} de ${total}</div>
+      </div>
+      <div class="kpi-card" style="--accent:#8C5A22">
+        <div class="kpi-label">Con asist. técnica</div>
+        <div class="kpi-value">${pct(nAsistencia, total)}</div>
+        <div class="kpi-sub">${nAsistencia} de ${total}</div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-title">Estructuras de producción utilizadas</div>
+        ${barRow('Invernadero', nInvernadero, total, '#6B7F3E')}
+        ${barRow('Macro túnel', nMacroTunel, total, '#8C5A22')}
+        ${barRow('Casa malla', nCasaMalla, total, '#4C7B9E')}
+      </div>
+      <div class="panel">
+        <div class="panel-title">Composición por género</div>
+        ${barRow('Mujeres', nMujeres, total, '#B5654A')}
+        ${barRow('Hombres', nHombres, total, '#4C7B9E')}
+        <div class="subsection-divider">
+          <div class="section-label" style="margin-top:0">Sanidad del cultivo</div>
+          ${barRow('Reportan plagas de insectos', nPlagas, total, '#C9861F')}
+          ${barRow('Mosca blanca', nMoscaBlanca, total, '#C9861F')}
+          ${barRow('Bacterias', nBacterias, total, '#A34433')}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Variedades de tomate más utilizadas</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:4px 24px">
+        ${topVariedades.map(([name, count]) => barRow(name, count, total, '#6B7F3E')).join('')}
+      </div>
+    </div>
+
+    <div class="footnote">Escribe un nombre arriba para buscar la ficha de un productor individual</div>
+  `;
+  document.getElementById('narrativeBtn').addEventListener('click', generateNarrative);
+}
+
+// ── Generación de narrativa ──────────────────────────────────
+
+function pctNum(n, total) { return total ? Math.round((n / total) * 100) : 0; }
+
+function topEntries(counter, n) {
+  return Object.entries(counter).sort((a, b) => b[1] - a[1]).slice(0, n);
+}
+
+function buildAggregateStats(scope) {
+  const total = scope.length;
+  const nInvernadero = scope.filter(p => p.invernadero).length;
+  const nMacroTunel = scope.filter(p => p.macroTunel).length;
+  const nCasaMalla = scope.filter(p => p.casaMalla).length;
+  const nNinguna = scope.filter(p => !p.invernadero && !p.macroTunel && !p.casaMalla).length;
+  const nAsistencia = scope.filter(p => p.asistenciaTecnica).length;
+  const nRiego = scope.filter(p => p.riego).length;
+  const nMujeres = scope.filter(p => p.genero === 'Mujeres').length;
+  const nHombres = scope.filter(p => p.genero === 'Hombres').length;
+  const nPlagas = scope.filter(p => p.tieneInsectos).length;
+  const nMoscaBlanca = scope.filter(p => p.moscaBlanca).length;
+  const nAranaRoja = scope.filter(p => p.aranaRoja).length;
+  const nBacterias = scope.filter(p => p.tieneBacterias).length;
+  const nVirus = scope.filter(p => p.tieneVirus).length;
+  const nMercado = scope.filter(p => p.destinoMercado).length;
+  const nFamiliar = scope.filter(p => p.destinoFamiliar).length;
+  const nSoloFamiliar = scope.filter(p => p.destinoFamiliar && !p.destinoMercado).length;
+  const areas = scope.map(p => p.areaParcela).filter(a => a > 0);
+  const avgArea = areas.length ? Math.round(areas.reduce((a, b) => a + b, 0) / areas.length) : 0;
+  const avgEdad = total ? Math.round(scope.reduce((s, p) => s + p.edad, 0) / total) : 0;
+  const nJovenes = scope.filter(p => p.edad < 35).length;
+  const nMayores = scope.filter(p => p.edad >= 60).length;
+
+  const expCounter = {};
+  scope.forEach(p => { expCounter[p.experiencia] = (expCounter[p.experiencia] || 0) + 1; });
+
+  const varCounter = {};
+  scope.forEach(p => {
+    [p.varDeterminada, p.varIndeterminada].forEach(v => { if (v) varCounter[v] = (varCounter[v] || 0) + 1; });
+  });
+
+  const munCounter = {};
+  scope.forEach(p => { munCounter[p.municipio] = (munCounter[p.municipio] || 0) + 1; });
+
+  return {
+    total, nInvernadero, nMacroTunel, nCasaMalla, nNinguna, nAsistencia, nRiego,
+    nMujeres, nHombres, nPlagas, nMoscaBlanca, nAranaRoja, nBacterias, nVirus,
+    nMercado, nFamiliar, nSoloFamiliar, avgArea, avgEdad, nJovenes, nMayores,
+    expCounter, varCounter, munCounter
+  };
+}
+
+function renderAggregateNarrative(scopeLabel, s) {
+  const p = (n) => pctNum(n, s.total);
+  const topVars = topEntries(s.varCounter, 3);
+  const topVarsStr = topVars.map(([name, count]) => `<strong>${esc(name)}</strong> (${count} productores, ${p(count)}%)`).join(', ');
+
+  const estructurasParts = [];
+  if (s.nInvernadero) estructurasParts.push(`invernadero (${p(s.nInvernadero)}%)`);
+  if (s.nMacroTunel) estructurasParts.push(`macro túnel (${p(s.nMacroTunel)}%)`);
+  if (s.nCasaMalla) estructurasParts.push(`casa malla (${p(s.nCasaMalla)}%)`);
+  const estructuraDominante = [
+    ['Invernadero', s.nInvernadero], ['Macro túnel', s.nMacroTunel], ['Casa malla', s.nCasaMalla]
+  ].sort((a, b) => b[1] - a[1])[0];
+
+  const riesgoSanitario = p(s.nPlagas) >= 70 ? 'alta' : (p(s.nPlagas) >= 40 ? 'moderada' : 'baja');
+  const brechaRiego = s.total - s.nRiego;
+  const brechaAsistencia = s.total - s.nAsistencia;
+
+  let munBreakdown = '';
+  if (Object.keys(s.munCounter).length > 1) {
+    const rows = Object.entries(s.munCounter).sort((a,b) => b[1]-a[1])
+      .map(([m, n]) => `<li><strong>${esc(m)}</strong>: ${n} productores (${p(n)}%)</li>`).join('');
+    munBreakdown = `<h3>Distribución geográfica</h3><ul>${rows}</ul>`;
+  }
+
+  return `
+    <h3>Perfil general</h3>
+    <p>El estudio cubre <strong>${s.total} productores</strong> de tomate en ${scopeLabel}, con una edad promedio de <strong>${s.avgEdad} años</strong> y un área de parcela promedio de <strong>${s.avgArea.toLocaleString()} m²</strong>. La composición por género muestra <strong>${p(s.nMujeres)}% mujeres</strong> y <strong>${p(s.nHombres)}% hombres</strong>. ${s.nJovenes > 0 ? `Un <strong>${p(s.nJovenes)}%</strong> son productores jóvenes (menores de 35 años), ` : ''}${s.nMayores > 0 ? `mientras que un <strong>${p(s.nMayores)}%</strong> tiene 60 años o más.` : ''}</p>
+
+    ${munBreakdown}
+
+    <h3>Estructuras de producción</h3>
+    <p>La estructura predominante es <strong>${estructuraDominante[0]}</strong>, usada por ${p(estructuraDominante[1])}% de los productores. En conjunto: ${estructurasParts.join(', ')}.${s.nNinguna > 0 ? ` <strong>${s.nNinguna} productores (${p(s.nNinguna)}%)</strong> no reportan ninguna estructura protegida, lo que sugiere producción a cielo abierto o un vacío de datos que vale la pena verificar en campo.` : ''}</p>
+
+    <h3>Acceso a riego y asistencia técnica</h3>
+    <p><strong>${p(s.nRiego)}%</strong> de los productores cuenta con sistema de riego${brechaRiego > 0 ? `, dejando una brecha de <strong>${brechaRiego} productores sin riego</strong> — un punto de atención directo para intervenciones de infraestructura hídrica.` : '.'} En cuanto a acompañamiento técnico, solo <strong>${p(s.nAsistencia)}%</strong> ha recibido asistencia técnica institucional${brechaAsistencia > 0 ? `, lo que deja a <strong>${brechaAsistencia} productores (${p(brechaAsistencia)}%)</strong> sin ese respaldo — la brecha más significativa para escalar capacitación.` : '.'}</p>
+
+    <h3>Sanidad del cultivo</h3>
+    <p>La presión de plagas es <strong>${riesgoSanitario}</strong>: <strong>${p(s.nPlagas)}%</strong> de los productores reporta problemas con insectos, principalmente <strong>mosca blanca</strong> (${p(s.nMoscaBlanca)}%)${s.nAranaRoja > 0 ? ` y araña roja (${p(s.nAranaRoja)}%)` : ''}. Adicionalmente, <strong>${p(s.nBacterias)}%</strong> reporta problemas bacterianos${s.nVirus > 0 ? ` y <strong>${p(s.nVirus)}%</strong> reporta presencia viral` : ''}. La combinación de alta incidencia de mosca blanca y presencia viral es una señal de alerta agronómica, dado que la mosca blanca es vector de virosis en tomate.</p>
+
+    <h3>Variedades y destino de la producción</h3>
+    <p>Las variedades más utilizadas son ${topVarsStr || 'sin un patrón dominante claro'}. Sobre el destino de la cosecha, <strong>${p(s.nMercado)}%</strong> vende en el mercado local y <strong>${p(s.nFamiliar)}%</strong> destina parte a consumo familiar.${s.nSoloFamiliar > 0 ? ` <strong>${s.nSoloFamiliar} productores (${p(s.nSoloFamiliar)}%)</strong> producen exclusivamente para autoconsumo, sin conexión comercial — un segmento candidato para intervenciones de vinculación a mercado.` : ''}</p>
+
+    <h3>Lectura general</h3>
+    <p>El perfil combinado sugiere una base productiva con adopción moderada-alta de estructuras protegidas pero con dos brechas claras de intervención: <strong>cobertura de riego</strong> y <strong>alcance de asistencia técnica</strong>, ambas por debajo del 100% de la población. La presión sanitaria por mosca blanca amerita seguimiento, dado su vínculo con la transmisión viral observada en el estudio.</p>
+  `;
+}
+
+function renderProducerNarrative(p) {
+  const estructuras = [];
+  if (p.invernadero) estructuras.push('invernadero');
+  if (p.macroTunel) estructuras.push('macro túnel');
+  if (p.casaMalla) estructuras.push('casa malla');
+
+  const sanidadIssues = [];
+  if (p.tieneInsectos) sanidadIssues.push('presencia de insectos' + (p.moscaBlanca ? ' (mosca blanca)' : '') + (p.aranaRoja ? (p.moscaBlanca ? ' y araña roja' : ' (araña roja)') : ''));
+  if (p.tieneBacterias) sanidadIssues.push('problemas bacterianos');
+  if (p.tieneVirus) sanidadIssues.push('presencia viral');
+
+  const variedades = [p.varDeterminada, p.varIndeterminada].filter(Boolean);
+
+  return `
+    <h3>Resumen del productor</h3>
+    <p><strong>${esc(p.nombre)}</strong>, de ${p.edad} años, cultiva tomate en el municipio de <strong>${esc(p.municipio)}</strong> sobre una parcela de <strong>${p.areaParcela.toLocaleString()} m²</strong>, con ${p.experiencia === '0 a 5' ? 'entre 0 y 5 años' : (p.experiencia === '6 a 10' ? 'entre 6 y 10 años' : 'más de 11 años')} de experiencia en el cultivo.</p>
+
+    <h3>Producción</h3>
+    <p>${estructuras.length ? `Utiliza <strong>${estructuras.join(', ')}</strong> como estructura(s) de producción.` : 'No reporta uso de estructuras protegidas (invernadero, macro túnel o casa malla).'} ${p.riego ? 'Cuenta con sistema de riego.' : '<strong>No cuenta con sistema de riego</strong>, lo que representa una limitación productiva relevante.'} ${p.asistenciaTecnica ? 'Ha recibido asistencia técnica institucional.' : '<strong>No ha recibido asistencia técnica</strong> — candidato prioritario para programas de acompañamiento.'}</p>
+
+    ${variedades.length ? `<h3>Variedades</h3><p>Trabaja con la(s) variedad(es): <strong>${variedades.map(esc).join(', ')}</strong>.</p>` : ''}
+
+    <h3>Sanidad del cultivo</h3>
+    <p>${sanidadIssues.length ? `Reporta ${sanidadIssues.join(', ')}.` : 'No reporta problemas sanitarios significativos en el cultivo.'}</p>
+
+    <h3>Destino de la producción</h3>
+    <p>${p.destinoFamiliar && p.destinoMercado ? 'Destina la cosecha tanto a consumo familiar como a venta en mercado local.' : (p.destinoMercado ? 'Destina la producción principalmente al mercado local.' : (p.destinoFamiliar ? 'Produce exclusivamente para consumo familiar, sin vínculo comercial reportado.' : 'No se reporta destino claro de la producción.'))}</p>
+  `;
+}
+
+function generateNarrative() {
+  const panel = document.getElementById('narrativePanel');
+  let bodyHtml, title, eyebrow;
+
+  if (state.selectedId) {
+    const p = PRODUCTORES.find(x => x.id === state.selectedId);
+    title = 'Narrativa individual: ' + p.nombre;
+    eyebrow = 'Análisis generado · Ficha de productor';
+    bodyHtml = renderProducerNarrative(p);
+  } else {
+    const scope = getScope();
+    const scopeLabel = state.municipio === 'Todos' ? 'los tres municipios del estudio (San Marcos, Palo Gordo, Tejutla)' : `el municipio de ${state.municipio}`;
+    title = 'Narrativa de análisis agregado';
+    eyebrow = 'Análisis generado · ' + (state.municipio === 'Todos' ? 'Todos los municipios' : state.municipio);
+    const stats = buildAggregateStats(scope);
+    bodyHtml = renderAggregateNarrative(scopeLabel, stats);
+  }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  panel.innerHTML = `
+    <div class="narrative-header">
+      <div>
+        <div class="narrative-eyebrow">${esc(eyebrow)}</div>
+        <div class="narrative-title">${esc(title)}</div>
+      </div>
+      <button class="narrative-close" id="narrativeCloseBtn">Cerrar</button>
+    </div>
+    <div class="narrative-body">${bodyHtml}</div>
+    <div class="narrative-footer">
+      <div class="narrative-meta">Generado a partir de los ${PRODUCTORES.length} registros del estudio · ${dateStr}</div>
+      <button class="narrative-btn secondary" id="narrativeCopyBtn">Copiar texto</button>
+    </div>
+  `;
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  document.getElementById('narrativeCloseBtn').addEventListener('click', () => {
+    panel.style.display = 'none';
+  });
+  document.getElementById('narrativeCopyBtn').addEventListener('click', () => {
+    const text = panel.querySelector('.narrative-body').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('narrativeCopyBtn');
+      const original = btn.textContent;
+      btn.textContent = 'Copiado';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    });
+  });
+}
+
+function render() {
+  renderMunButtons();
+  renderResultList();
+  renderProfile();
+  renderSummary();
+  // Ocultar narrativa si cambia el contexto de selección/filtro tras generarla
+  const panel = document.getElementById('narrativePanel');
+  if (panel) panel.style.display = 'none';
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  state.query = e.target.value;
+  state.selectedId = null;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
